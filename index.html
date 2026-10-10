@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Akun</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+        }
+
+        body {
+            background-color: #000;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        /* HEADER */
+        .header-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 40px;
+            margin-top: 20px;
+        }
+
+        .profile-icon {
+            width: 100px;
+            height: 100px;
+            border: 4px solid #fff;
+            border-radius: 50% 40% 50% 40% / 40% 50% 40% 50%;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: -20px;
+            z-index: 2;
+            background-color: #222;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .profile-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-icon::after {
+            content: "📷";
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            background: rgba(0,0,0,0.7);
+            border-radius: 50%;
+            padding: 3px;
+            font-size: 14px;
+        }
+
+        .brand-name {
+            font-size: 3rem;
+            font-weight: bold;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            transform: rotate(-5deg);
+            z-index: 1;
+            outline: none;
+        }
+
+        /* MENU KOTAK */
+        .menu-container {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            width: 100%;
+            max-width: 350px;
+        }
+
+        .menu-box {
+            width: 100%;
+            height: 80px;
+            border: 4px solid #fff;
+            background: transparent;
+            color: #fff;
+            font-size: 1.5rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            border-radius: 10px 5px 15px 5px;
+        }
+
+        .menu-box:hover {
+            background-color: #fff;
+            color: #000;
+            transform: scale(1.02);
+        }
+
+        .menu-box:active {
+            transform: scale(0.98);
+        }
+
+        /* MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background-color: #000;
+            border: 4px solid #fff;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 900px;
+            padding: 20px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px dashed #fff;
+            padding-bottom: 10px;
+        }
+
+        .modal-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 2rem;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        /* GRID 5 KOLOM */
+        .stock-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+        }
+
+        .stock-item {
+            aspect-ratio: 9/16;
+            border: 2px dashed #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #1a1a1a;
+            cursor: pointer;
+            transition: transform 0.2s;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .stock-item:hover {
+            transform: scale(1.05);
+            border-color: #00ff00;
+        }
+
+        .stock-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* Placeholder plus (+) */
+        .stock-item .placeholder {
+            color: #666;
+            font-size: 2.5rem;
+            font-weight: bold;
+            user-select: none;
+        }
+
+        /* Tombol hapus di pojok foto */
+        .stock-item .delete-btn {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: rgba(255, 0, 0, 0.85);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-size: 14px;
+            cursor: pointer;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            z-index: 5;
+        }
+
+        .stock-item.has-image:hover .delete-btn {
+            display: flex;
+        }
+
+        /* Info teks */
+        .info-text {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 0.85rem;
+            color: #888;
+            border-top: 1px dashed #444;
+            padding-top: 10px;
+        }
+
+        /* RESPONSIF HP */
+        @media (max-width: 600px) {
+            .brand-name { font-size: 2rem; }
+            .profile-icon { width: 70px; height: 70px; }
+            .stock-grid { grid-template-columns: repeat(2, 1fr); }
+            .menu-box { height: 60px; font-size: 1.2rem; }
+            .modal-title { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============ HEADER ============ -->
+    <div class="header-section">
+        <div class="profile-icon" onclick="uploadProfile()">
+            <img id="profileImg" src="" alt="Profile" style="display:none;">
+            <span id="profilePlaceholder" style="color:#666; font-size:2rem;">+</span>
+        </div>
+        <div class="brand-name" contenteditable="true" id="brandName">NAMA</div>
+    </div>
+
+    <!-- ============ MENU UTAMA ============ -->
+    <div class="menu-container">
+        <div class="menu-box" onclick="openModal('ff')">STOCK FF</div>
+        <div class="menu-box" onclick="openModal('ml')">STOCK ML</div>
+        <div class="menu-box" onclick="openModal('tiktok')">STOCK TIKTOK</div>
+    </div>
+
+    <!-- ============ POPUP MODAL ============ -->
+    <div class="modal" id="stockModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="modalTitle">Judul</div>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+
+            <!-- GRID FF -->
+            <div class="stock-grid" id="grid-ff"></div>
+            <!-- GRID ML -->
+            <div class="stock-grid" id="grid-ml" style="display:none;"></div>
+            <!-- GRID TIKTOK -->
+            <div class="stock-grid" id="grid-tiktok" style="display:none;"></div>
+
+            <div class="info-text">
+                💡 Klik slot untuk upload foto • Hover foto lalu klik ❌ untuk hapus
+            </div>
+        </div>
+    </div>
+
+    <!-- Input file tersembunyi -->
+    <input type="file" id="fileInput" accept="image/*" style="display:none;">
+
+    <!-- ============ JAVASCRIPT ============ -->
+    <script>
+        // Kategori dan jumlah slot
+        const categories = {
+            ff: { title: 'STOCK FF', slots: 5 },
+            ml: { title: 'STOCK ML', slots: 5 },
+            tiktok: { title: 'STOCK TIKTOK', slots: 5 }
+        };
+
+        let currentSlot = null; // Slot yang sedang di-upload
+        let currentCategory = null;
+
+        // ============== INISIALISASI GRID ==============
+        function initGrids() {
+            for (const cat in categories) {
+                const grid = document.getElementById('grid-' + cat);
+                grid.innerHTML = '';
+                for (let i = 0; i < categories[cat].slots; i++) {
+                    const item = document.createElement('div');
+                    item.className = 'stock-item';
+                    item.dataset.category = cat;
+                    item.dataset.slot = i;
+                    item.onclick = (e) => handleSlotClick(e, cat, i);
+                    grid.appendChild(item);
+                    loadImage(cat, i, item);
+                }
+            }
+        }
+
+        // ============== LOAD FOTO DARI LOCALSTORAGE ==============
+        function loadImage(cat, slot, element) {
+            const key = `stock_${cat}_${slot}`;
+            const data = localStorage.getItem(key);
+            element.innerHTML = '';
+
+            if (data) {
+                const img = document.createElement('img');
+                img.src = data;
+                element.appendChild(img);
+                element.classList.add('has-image');
+                element.style.borderStyle = 'solid';
+
+                // Tombol hapus
+                const delBtn = document.createElement('button');
+                delBtn.className = 'delete-btn';
+                delBtn.innerText = '×';
+                delBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    if (confirm('Hapus foto ini?')) {
+                        localStorage.removeItem(key);
+                        loadImage(cat, slot, element);
+                    }
+                };
+                element.appendChild(delBtn);
+            } else {
+                element.classList.remove('has-image');
+                element.style.borderStyle = 'dashed';
+                const ph = document.createElement('span');
+                ph.className = 'placeholder';
+                ph.innerText = '+';
+                element.appendChild(ph);
+            }
+        }
+
+        // ============== KLIK SLOT UNTUK UPLOAD ==============
+        function handleSlotClick(e, cat, slot) {
+            // Jika klik tombol hapus, skip
+            if (e.target.classList.contains('delete-btn')) return;
+
+            currentCategory = cat;
+            currentSlot = slot;
+            document.getElementById('fileInput').click();
+        }
+
+        // ============== HANDLE FILE YANG DIPILIH ==============
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // Kompres gambar supaya tidak terlalu besar untuk localStorage
+            compressImage(file, 600, function(compressedData) {
+                if (currentSlot === 'profile') {
+                    // Simpan foto profil
+                    localStorage.setItem('profile_image', compressedData);
+                    loadProfileImage();
+                } else {
+                    // Simpan foto stock
+                    const key = `stock_${currentCategory}_${currentSlot}`;
+                    try {
+                        localStorage.setItem(key, compressedData);
+                        const grid = document.getElementById('grid-' + currentCategory);
+                        const item = grid.children[currentSlot];
+                        loadImage(currentCategory, currentSlot, item);
+                    } catch (err) {
+                        alert('Gagal menyimpan foto! Storage browser penuh. Hapus beberapa foto dulu.');
+                    }
+                }
+                // Reset input
+                document.getElementById('fileInput').value = '';
+            });
+        });
+
+        // ============== KOMPRES GAMBAR ==============
+        function compressImage(file, maxWidth, callback) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > maxWidth) {
+                        height = (maxWidth / width) * height;
+                        width = maxWidth;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    callback(canvas.toDataURL('image/jpeg', 0.7));
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // ============== FOTO PROFIL ==============
+        function uploadProfile() {
+            currentSlot = 'profile';
+            currentCategory = null;
+            document.getElementById('fileInput').click();
+        }
+
+        function loadProfileImage() {
+            const data = localStorage.getItem('profile_image');
+            const img = document.getElementById('profileImg');
+            const ph = document.getElementById('profilePlaceholder');
+            if (data) {
+                img.src = data;
+                img.style.display = 'block';
+                ph.style.display = 'none';
+            } else {
+                img.style.display = 'none';
+                ph.style.display = 'block';
+            }
+        }
+
+        // ============== NAMA BRAND (AUTO SAVE) ==============
+        const brandName = document.getElementById('brandName');
+        const savedName = localStorage.getItem('brand_name');
+        if (savedName) brandName.innerText = savedName;
+
+        brandName.addEventListener('input', function() {
+            localStorage.setItem('brand_name', brandName.innerText);
+        });
+
+        // ============== MODAL ==============
+        function openModal(category) {
+            const modal = document.getElementById('stockModal');
+            const title = document.getElementById('modalTitle');
+
+            // Sembunyikan semua grid
+            document.getElementById('grid-ff').style.display = 'none';
+            document.getElementById('grid-ml').style.display = 'none';
+            document.getElementById('grid-tiktok').style.display = 'none';
+
+            // Tampilkan grid sesuai kategori
+            title.innerText = categories[category].title;
+            document.getElementById('grid-' + category).style.display = 'grid';
+
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('stockModal').style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('stockModal');
+            if (event.target == modal) closeModal();
+        }
+
+        // ============== JALANKAN ==============
+        initGrids();
+        loadProfileImage();
+    </script>
+
+</body>
+</html>
